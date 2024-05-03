@@ -1,19 +1,23 @@
 terraform {
-    required_version = ">=1.0"
-    required_providers {
-        random = {
-          source  = "hashicorp/random"
-        }
+  required_version = ">=1.0"
+  required_providers {
+    random = {
+      source = "hashicorp/random"
     }
- }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "<= 3.56"
+    }
+  }
+}
 
-provider "aws" {  
+provider "aws" {
 }
 
 resource "random_string" "random" {
-  length           = 6
-  special          = false
-  lower            = true  
+  length  = 6
+  special = false
+  lower   = true
 }
 
 resource "random_pet" "prefix" {}
@@ -57,25 +61,25 @@ module "vpc" {
 }
 
 module "eks" {
-  source          = "terraform-aws-modules/eks/aws"
-  version         = "17.24.0"
-  cluster_name    = local.cluster_name
-  cluster_version = "1.21"
-  subnets         = module.vpc.private_subnets
-  write_kubeconfig = false
+  source                   = "terraform-aws-modules/eks/aws"
+  version                  = "17.24.0"
+  cluster_name             = local.cluster_name
+  cluster_version          = "1.21"
+  subnets                  = module.vpc.private_subnets
+  write_kubeconfig         = false
   wait_for_cluster_timeout = 600
-  vpc_id = module.vpc.vpc_id
+  vpc_id                   = module.vpc.vpc_id
 
   workers_group_defaults = {
     root_volume_type = "gp2"
   }
 
-worker_groups = [
-  {
+  worker_groups = [
+    {
       name                          = "${local.cluster_name}-worker-group"
       instance_type                 = "t2.small"
       asg_desired_capacity          = 2
-      additional_security_group_ids = [ ]
+      additional_security_group_ids = []
     }
   ]
 }
